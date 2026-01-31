@@ -1,46 +1,54 @@
 (* File lexer.mll *)
 {
- open Parser
- exception No_such_symbol
+open Parser
+exception No_such_symbol of string
+
+let line_num = ref 1
+let current_token = ref ""
+
+let token t name =
+    current_token := name;
+    t
 }
 
 let digit = ['0'-'9']
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9']*
 
 rule lexer = parse
-| digit+ as num  { NUM (int_of_string num) }
-| "if"                    { IF }
-| "else"                  { ELSE }
-| "while"                 { WHILE }
-| "scan"                  { SCAN }
-| "sprint"                { SPRINT }
-| "iprint"                { IPRINT }
-| "int"                   { INT }
-| "return"                { RETURN }
-| "type"                  { TYPE }
-| "void"                  { VOID }
-| id as text              { ID text }
-| '\"'[^'\"']*'\"' as str { STR str }
-| '='                     { ASSIGN }
-| "=="                    { EQ }
-| "!="                    { NEQ }
-| '>'                     { GT }
-| '<'                     { LT }
-| ">="                    { GE }
-| "<="                    { LE }
-| '+'                     { PLUS }
-| '-'                     { MINUS }
-| '*'                     { TIMES }
+| digit+ as num           { token (NUM (int_of_string num)) num }
+| "if"                    { token IF "if" }
+| "else"                  { token ELSE "else" }
+| "while"                 { token WHILE "while" }
+| "scan"                  { token SCAN "scan"}
+| "sprint"                { token SPRINT "sprint" }
+| "iprint"                { token IPRINT "iprint" }
+| "int"                   { token INT "int" }
+| "return"                { token RETURN "return" }
+| "type"                  { token TYPE "type" }
+| "void"                  { token VOID "void" }
+| id as text              { token (ID text) text }
+| '\"'[^'\"']*'\"' as str { token (STR str) str }
+| '='                     { token ASSIGN "=" }
+| "=="                    { token EQ "==" }
+| "!="                    { token NEQ "!=" }
+| '>'                     { token GT ">" }
+| '<'                     { token LT "<" }
+| ">="                    { token GE ">=" }
+| "<="                    { token LE "<=" }
+| '+'                     { token PLUS "+" }
+| '-'                     { token MINUS "-" }
+| '*'                     { token TIMES "*" }
 | "//"[^'\n']*            { lexer lexbuf } (* single-line comment *)
-| '/'                     { DIV }
-| '{'                     { LB  }
-| '}'                     { RB  }
-| '['                     { LS }
-| ']'                     { RS }
-| '('                     { LP  }
-| ')'                     { RP  }
-| ','                     { COMMA }
-| ';'                     { SEMI }
-| [' ' '\t' '\n']         { lexer lexbuf } (* eat up whitespace *)
+| '/'                     { token DIV "/" }
+| '{'                     { token LB "{" }
+| '}'                     { token RB "}" }
+| '['                     { token LS "[" }
+| ']'                     { token RS "]" }
+| '('                     { token LP "(" }
+| ')'                     { token RP ")" }
+| ','                     { token COMMA "," }
+| ';'                     { token SEMI ";" }
+| [' ' '\t']              { lexer lexbuf } (* eat up whitespace *)
+| '\n'                    { incr line_num; lexer lexbuf}
 | eof                     { raise End_of_file }
-| _                       { raise No_such_symbol }
+| _  as c                 { raise (No_such_symbol (String.make 1 c)) }

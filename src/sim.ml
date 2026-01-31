@@ -87,7 +87,12 @@ let main () =
 
 let _ =
   try main () with
-  | Parsing.Parse_error -> print_string "syntax error\n"
+  | Parsing.Parse_error ->
+      Printf.printf "syntax error at line %d, unexpected token: \"%s\"\n"
+        !Lexer.line_num !Lexer.current_token
+  | Lexer.No_such_symbol c ->
+      Printf.printf "lexical error at line %d, unknown character: \"%s\"\n"
+        !Lexer.line_num c
   | Table.No_such_symbol x -> print_string ("no such symbol: \"" ^ x ^ "\"\n")
   | Semant.TypeErr s -> print_string (s ^ "\n")
   | Semant.Err s -> print_string (s ^ "\n")

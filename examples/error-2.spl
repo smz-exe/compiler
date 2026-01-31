@@ -1,0 +1,5 @@
+{
+    // This file is intended to produce a lexer error
+    int x;
+    x = 5 @ 3; // lexer raises No_such_symbol
+}

@@ -1,0 +1,5 @@
+{
+    // This file is intended to produce a parser error
+    int x // missing semicolon here
+    sprint("This line will not compile due to the error above.\n");
+}
