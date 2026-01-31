@@ -1,0 +1,20 @@
+# OCaml build artifacts
+*.cmi
+*.cmo
+*.cma
+*.cmx
+*.cmxa
+*.o
+*.a
+
+# Generated Ocaml files
+src/parser.ml
+src/parser.mli
+src/lexer.ml
+
+# Compiler executable
+src/simc
+src/print_ast
+
+# Compiler
+build/
