@@ -39,6 +39,7 @@ rule lexer = parse
 | '-'                     { token MINUS "-" }
 | '*'                     { token TIMES "*" }
 | '%'                     { token MOD "%" }
+| '^'                     { token EXP "^" }
 | "//"[^'\n']*            { lexer lexbuf } (* single-line comment *)
 | '/'                     { token DIV "/" }
 | '{'                     { token LB "{" }

@@ -13,6 +13,15 @@ let incLabel () =
 (* Copy str n times *)
 let rec nCopyStr n str = if n > 0 then str ^ nCopyStr (pred n) str else ""
 
+(* Helper for exponentiation *)
+let exp_func =
+  "__exp:\n" ^ "\tpushq %rbp\n" ^ "\tmovq %rsp, %rbp\n"
+  ^ "\tmovq 16(%rbp), %rbx\n" (* base *) ^ "\tmovq 24(%rbp), %rcx\n" (* power *)
+  ^ "\tmovq $1, %rax\n" (* result = 1 *) ^ "__exp_loop:\n"
+  ^ "\tcmpq $0, %rcx\n" ^ "\tje __exp_end\n" ^ "\timulq %rbx, %rax\n"
+  ^ "\tdecq %rcx\n" ^ "\tjmp __exp_loop\n" ^ "__exp_end:\n" ^ "\tleaveq\n"
+  ^ "\tretq\n"
+
 (* Static link to pass to callee *)
 let passLink src dst =
   if src >= dst then
@@ -208,6 +217,9 @@ and trans_exp ast nest env =
   | CallFunc ("%", [ left; right ]) ->
       trans_exp left nest env ^ trans_exp right nest env ^ "\tpopq %rbx\n"
       ^ "\tpopq %rax\n" ^ "\tcqto\n" ^ "\tidivq %rbx\n" ^ "\tpushq %rdx\n"
+  | CallFunc ("^", [ base; power ]) ->
+      trans_exp power nest env ^ trans_exp base nest env ^ "\tcallq __exp\n"
+      ^ "\taddq $16, %rsp\n" ^ "\tpushq %rax\n"
   (* Negation *)
   | CallFunc ("!", arg :: _) -> trans_exp arg nest env ^ "\tnegq (%rsp)\n"
   (* Function call: return value is in %rax *)
@@ -243,4 +255,4 @@ and trans_cond ast nest env =
 (* Generate entire program *)
 let trans_prog ast =
   let code = trans_stmt ast 0 initTable initTable in
-  io ^ header ^ code ^ "\txorq %rax, %rax\n" ^ epilogue ^ !output
+  io ^ exp_func ^ header ^ code ^ "\txorq %rax, %rax\n" ^ epilogue ^ !output
