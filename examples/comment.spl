@@ -1,0 +1,13 @@
+{
+    // This is a comment which should be ignored by the compiler
+    int num; // inline comment after code
+        sprint ("Enter a number: ");
+        scan (num);
+        if (num <0) {
+            sprint ("Negative number entered.\n");
+        } else {
+            sprint ("It's greater than or equal to 0.\n");
+        }
+        // full line comment
+        sprint("Done.\n");
+}
