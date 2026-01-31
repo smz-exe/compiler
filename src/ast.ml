@@ -21,5 +21,6 @@ and dec =
   | FuncDec of id * (typ * id) list * typ * stmt
   | TypeDec of id * typ
   | VarDec of typ * id
+  | VarDecInit of typ * id * exp
 
 and typ = NameTyp of string | ArrayTyp of int * typ | IntTyp | VoidTyp

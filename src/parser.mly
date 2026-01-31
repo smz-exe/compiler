@@ -36,6 +36,7 @@ decs : decs dec { $1@$2 }
      ;
 
 dec  : ty ids SEMI   { List.map (fun x -> VarDec ($1,x)) $2 }
+     | ty ID ASSIGN expr SEMI { [VarDecInit ($1, $2, $4)] }
      | TYPE ID ASSIGN ty SEMI { [TypeDec ($2,$4)] }
      | ty ID LP fargs_opt RP block  { [FuncDec($2, $4, $1, $6)] }
      | VOID ID LP fargs_opt RP block  { [FuncDec($2, $4, VoidTyp, $6)] }

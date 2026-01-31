@@ -38,6 +38,8 @@ let rec check_redecl decs tl vl =
       if List.mem s vl then raise (SymErr s) else check_redecl rest tl (s :: vl)
   | VarDec (_, s) :: rest ->
       if List.mem s vl then raise (SymErr s) else check_redecl rest tl (s :: vl)
+  | VarDecInit (t, s, _) :: rest ->
+      if List.mem s vl then raise (SymErr s) else check_redecl rest tl (s :: vl)
   | TypeDec (s, _) :: rest ->
       if List.mem s tl then raise (SymErr s) else check_redecl rest (s :: tl) vl
 
@@ -71,6 +73,13 @@ let rec type_dec ast (nest, addr) tenv env =
       (tenv, env', addr)
   (* Variable declaration processing *)
   | VarDec (t, s) ->
+      ( tenv,
+        update s
+          (VarEntry { ty = create_ty t tenv; offset = addr - 8; level = nest })
+          env,
+        addr - 8 )
+  (* Variable declaration with initialization *)
+  | VarDecInit (t, s, _) ->
       ( tenv,
         update s
           (VarEntry { ty = create_ty t tenv; offset = addr - 8; level = nest })

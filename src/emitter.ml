@@ -57,6 +57,8 @@ let rec trans_dec ast nest tenv env =
   (* Epilogue *)
   (* Variable declaration *)
   | VarDec (t, s) -> ()
+  (* Variable declaration with initialization *)
+  | VarDecInit (t, s, e) -> ()
   (* Type declaration *)
   | TypeDec (s, t) -> (
       let entry = tenv s in
@@ -111,22 +113,36 @@ and trans_stmt ast nest tenv env =
           ^ "\tcallq " ^ s ^ "\n" (* Pop pushed arguments + static link *)
           ^ sprintf "\taddq $%d, %%rsp\n" ((List.length el + 1 + 1) / 2 * 2 * 8)
       | _ -> raise (No_such_symbol s))
-  (* Block code: statement blocks ignore function definitions *)
+  (* Block code *)
   | Block (dl, sl) ->
       (* Process declarations in block *)
       let tenv', env', addr' = type_decs dl nest tenv env in
       List.iter (fun d -> trans_dec d nest tenv' env') dl;
+
       (* Extend frame *)
       let ex_frame = sprintf "\tsubq $%d, %%rsp\n" ((-addr' + 16) / 16 * 16) in
-      (* Generate code for body (statement list) *)
+
+      (* Generate initialization code *)
+      let init_code =
+        List.fold_left
+          (fun code d ->
+            match d with
+            | VarDecInit (_, s, e) ->
+                code ^ trans_stmt (Assign (Var s, e)) nest tenv' env'
+            | _ -> code)
+          "" dl
+      in
+
+      (* Generate code for statement *)
       let code =
         List.fold_left
           (fun code ast -> code ^ trans_stmt ast nest tenv' env')
           "" sl
-        (* Add frame extension for local variables *)
       in
-      ex_frame ^ code
-  (* If statement without else *)
+
+      (* Combine: frame + init + statements *)
+      ex_frame ^ init_code ^ code
+      (* If statement without else *)
   | If (e, s, None) ->
       let condCode, l = trans_cond e nest env in
       condCode ^ trans_stmt s nest tenv env ^ sprintf "L%d:\n" l
