@@ -1,0 +1,9 @@
+  {
+    // Example program to demonstrate modulo operation
+    int a, b;
+    a = 17;
+    b = 5;
+    sprint("Answer = ");
+    iprint(a % b);  // Should print 2
+    sprint("\n");
+  }
