@@ -35,6 +35,7 @@ rule lexer = parse
 | '<'                     { token LT "<" }
 | ">="                    { token GE ">=" }
 | "<="                    { token LE "<=" }
+| "++"                    { token INC "++" }
 | '+'                     { token PLUS "+" }
 | '-'                     { token MINUS "-" }
 | '*'                     { token TIMES "*" }

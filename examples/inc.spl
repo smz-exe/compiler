@@ -1,0 +1,6 @@
+  {
+      int x = 5;
+      x++;
+      iprint(x);    // Should print 6
+      sprint("\n");
+  }
